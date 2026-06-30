@@ -105,7 +105,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        <div className="flex min-h-screen flex-col">
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <footer className="w-full border-t border-border/40 py-6 text-center text-sm text-muted-foreground bg-background">
+            designed and developed By Thagireddy SaiCharan Reddy
+          </footer>
+        </div>
         <Toaster richColors theme="dark" position="top-right" />
       </AuthProvider>
     </QueryClientProvider>
