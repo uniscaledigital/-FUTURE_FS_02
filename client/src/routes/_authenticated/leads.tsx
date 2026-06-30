@@ -85,60 +85,83 @@ function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[240px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setPage(1); }}
-            placeholder="Search name, email, phone, company…"
-            className="pl-9"
-          />
+      <Card className="border-border p-5 shadow-sm shadow-slate-900/5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">Lead workspace</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight">Manage your sales pipeline</h1>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+              Filter, search, and review the most important deals in one place. Click any row to view details and update the lead.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+              <FilterIcon className="h-3.5 w-3.5" /> Filters
+            </div>
+            <CreateLeadDialog />
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <FilterIcon className="h-4 w-4 text-muted-foreground" />
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {LEAD_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={priority} onValueChange={(v) => { setPriority(v); setPage(1); }}>
-            <SelectTrigger className="w-[130px]"><SelectValue placeholder="Priority" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All priority</SelectItem>
-              {LEAD_PRIORITIES.map((p) => <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={source} onValueChange={(v) => { setSource(v); setPage(1); }}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Source" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All sources</SelectItem>
-              {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{SOURCE_LABELS[s]}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <CreateLeadDialog />
-      </div>
+      </Card>
 
-      <Card className="overflow-hidden border-border bg-card p-0">
+      <Card className="border-border p-5 shadow-sm shadow-slate-900/5">
+        <div className="grid gap-3 xl:grid-cols-[1fr_auto] xl:items-end">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">Search leads</p>
+            <div className="relative max-w-md">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => { setQ(e.target.value); setPage(1); }}
+                placeholder="Search name, email, phone, company…"
+                className="pl-11"
+                aria-label="Search leads"
+              />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+              <SelectTrigger className="min-w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {LEAD_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={priority} onValueChange={(v) => { setPriority(v); setPage(1); }}>
+              <SelectTrigger className="min-w-[150px]"><SelectValue placeholder="Priority" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All priorities</SelectItem>
+                {LEAD_PRIORITIES.map((p) => <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={source} onValueChange={(v) => { setSource(v); setPage(1); }}>
+              <SelectTrigger className="min-w-[150px]"><SelectValue placeholder="Source" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All sources</SelectItem>
+                {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{SOURCE_LABELS[s]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden border-border bg-card p-0 shadow-sm shadow-slate-900/5">
         {isLoading ? (
           <div className="space-y-2 p-4">
-            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-[1rem]" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
             <Inbox className="h-10 w-10 text-muted-foreground" />
-            <h3 className="mt-3 font-display text-lg font-semibold">No leads match</h3>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              Try clearing filters, or create your first lead to get started.
+            <h3 className="text-lg font-semibold">No leads match your view</h3>
+            <p className="max-w-sm text-sm text-muted-foreground">
+              Clear filters or create a new lead to populate the pipeline.
             </p>
+            <CreateLeadDialog />
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
+              <thead className="bg-muted/70 text-xs uppercase tracking-[0.22em] text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium"><SortBtn k="full_name" label="Name" /></th>
                   <th className="px-4 py-3 text-left font-medium"><SortBtn k="company" label="Company" /></th>
@@ -159,43 +182,43 @@ function LeadsPage() {
                   return (
                     <motion.tr
                       key={l.id}
-                      initial={{ opacity: 0, y: 4 }}
+                      initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: i * 0.015 }}
+                      transition={{ duration: 0.24, delay: i * 0.02 }}
                       onClick={() => { setSelected(l); setOpen(true); }}
-                      className="cursor-pointer border-t border-border/60 transition-colors hover:bg-accent/50"
+                      className="cursor-pointer border-t border-border/60 bg-card/95 transition hover:bg-primary/5"
                     >
-                      <td className="px-4 py-3">
-                        <p className="font-medium">{l.full_name}</p>
+                      <td className="px-4 py-4">
+                        <p className="font-medium text-foreground">{l.full_name}</p>
                         {l.job_title && <p className="text-xs text-muted-foreground">{l.job_title}</p>}
                       </td>
-                      <td className="px-4 py-3">{l.company ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        <p className="text-xs">{l.email}</p>
+                      <td className="px-4 py-4 text-muted-foreground">{l.company ?? "—"}</td>
+                      <td className="px-4 py-4">
+                        <p className="text-xs text-foreground">{l.email}</p>
                         {l.phone && <p className="text-xs text-muted-foreground">{l.phone}</p>}
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{SOURCE_LABELS[l.source]}</td>
-                      <td className="px-4 py-3">
-                        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider", STATUS_STYLES[l.status])}>
+                      <td className="px-4 py-4 text-xs text-muted-foreground">{SOURCE_LABELS[l.source]}</td>
+                      <td className="px-4 py-4">
+                        <span className={cn("rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]", STATUS_STYLES[l.status])}>
                           {STATUS_LABELS[l.status]}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider", PRIORITY_STYLES[l.priority])}>
+                      <td className="px-4 py-4">
+                        <span className={cn("rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]", PRIORITY_STYLES[l.priority])}>
                           {PRIORITY_LABELS[l.priority]}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs">
+                      <td className="px-4 py-4 text-xs">
                         {l.follow_up_date ? (
-                          <span className={cn("inline-flex items-center gap-1", overdue && "text-warning")}>
+                          <span className={cn("inline-flex items-center gap-1", overdue && "text-warning")}> 
                             {overdue && <AlertTriangle className="h-3 w-3" />}
                             {format(new Date(l.follow_up_date), "MMM d, yyyy")}
                           </span>
-                        ) : <span className="text-muted-foreground">—</span>}
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {format(new Date(l.created_at), "MMM d, yyyy")}
-                      </td>
+                      <td className="px-4 py-4 text-xs text-muted-foreground">{format(new Date(l.created_at), "MMM d, yyyy")}</td>
                     </motion.tr>
                   );
                 })}

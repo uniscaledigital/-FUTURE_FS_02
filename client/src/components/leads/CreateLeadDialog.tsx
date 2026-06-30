@@ -27,7 +27,7 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-export function CreateLeadDialog() {
+export function CreateLeadDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const { user } = useAuth();
@@ -73,9 +73,11 @@ export function CreateLeadDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> New lead
-        </Button>
+        {trigger ?? (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> New lead
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>

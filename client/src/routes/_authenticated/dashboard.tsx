@@ -14,7 +14,9 @@ import { fetchLeads, type Lead } from "@/services/leads";
 import {
   LEAD_STATUSES, STATUS_LABELS, STATUS_STYLES, SOURCE_LABELS,
 } from "@/lib/leads.constants";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CreateLeadDialog } from "@/components/leads/CreateLeadDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -34,14 +36,14 @@ function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="relative overflow-hidden border-border bg-card p-5">
-        <div className="flex items-start justify-between">
+      <Card className="relative overflow-hidden border-border bg-card p-6 shadow-sm shadow-slate-200/10">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-            <p className="mt-2 font-display text-3xl font-semibold">{value}</p>
-            {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+            <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">{label}</p>
+            <p className="mt-3 font-display text-3xl font-semibold">{value}</p>
+            {hint && <p className="mt-2 text-sm text-muted-foreground">{hint}</p>}
           </div>
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1", accent ?? "bg-primary/15 text-primary ring-primary/30")}>
+          <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ring-primary/20", accent ?? "bg-primary/15 text-primary ring-primary/30")}> 
             <Icon className="h-5 w-5" />
           </div>
         </div>
@@ -60,7 +62,7 @@ function Dashboard() {
     return (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full" />
+          <Skeleton key={i} className="h-28 w-full rounded-[1.5rem]" />
         ))}
       </div>
     );
@@ -89,13 +91,14 @@ function Dashboard() {
   }, {});
   const sourceData = Object.entries(sourceMap).map(([k, v]) => ({ name: SOURCE_LABELS[k as keyof typeof SOURCE_LABELS] ?? k, value: v }));
 
-  // last 6 months
   const months = Array.from({ length: 6 }).map((_, i) => {
     const d = subMonths(startOfMonth(new Date()), 5 - i);
     const key = format(d, "MMM");
     const count = leads.filter((l) => {
       const c = new Date(l.created_at);
-      return c >= d && c < subMonths(startOfMonth(new Date()), 5 - i - 1) || (i === 5 && c >= d);
+      const start = d;
+      const end = i === 5 ? new Date() : subMonths(startOfMonth(new Date()), 5 - i - 1);
+      return c >= start && c < end;
     }).length;
     return { month: key, leads: count };
   });
@@ -104,40 +107,69 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
+      <div className="rounded-[1.5rem] border border-border bg-card p-6 shadow-sm shadow-slate-900/5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">Welcome back</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">Keep your sales pipeline moving.</h2>
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              Nimbus CRM gives your team quick lead visibility, smarter follow-up timing, and polished reporting from one clean workspace.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:auto-cols-max sm:grid-flow-col">
+            <CreateLeadDialog trigger={
+              <Button variant="secondary" className="min-w-[150px]">Create lead</Button>
+            } />
+            <Button
+              variant="outline"
+              className="min-w-[150px]"
+              onClick={() => window.location.assign("/leads")}
+            >
+              View reports
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total leads" value={total} icon={Users} />
-        <StatCard label="New" value={by("new")} icon={UserPlus} accent="bg-info/15 text-info ring-info/30" />
-        <StatCard label="Converted" value={converted} icon={Trophy} accent="bg-success/15 text-success ring-success/30" hint={`${conversionRate}% conversion`} />
-        <StatCard label="Lost" value={lost} icon={TrendingDown} accent="bg-destructive/15 text-destructive ring-destructive/30" />
-        <StatCard label="Contacted" value={by("contacted")} icon={Phone} accent="bg-primary/15 text-primary ring-primary/30" />
-        <StatCard label="Qualified" value={by("qualified")} icon={Sparkles} accent="bg-info/15 text-info ring-info/30" />
-        <StatCard label="Today's leads" value={todayCount} icon={ArrowUpRight} accent="bg-accent text-accent-foreground ring-primary/30" />
-        <StatCard label="Overdue follow-ups" value={overdue} icon={CalendarClock} accent="bg-warning/15 text-warning ring-warning/30" />
+        <StatCard label="New leads" value={by("new")} icon={UserPlus} accent="bg-sky-100 text-sky-700 ring-sky-200" />
+        <StatCard label="Conversion rate" value={`${conversionRate}%`} icon={Trophy} accent="bg-emerald-100 text-emerald-700 ring-emerald-200" hint={`${converted} converted`} />
+        <StatCard label="Overdue follow-ups" value={overdue} icon={CalendarClock} accent="bg-orange-100 text-orange-700 ring-orange-200" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">Leads over time</h3>
-            <span className="text-xs text-muted-foreground">Last 6 months</span>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Pipeline</p>
+              <h3 className="text-lg font-semibold">Leads over time</h3>
+            </div>
+            <span className="rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Last 6 months</span>
           </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={months}>
-                <CartesianGrid stroke="oklch(0.3 0.03 265)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" stroke="oklch(0.7 0.02 260)" fontSize={12} />
-                <YAxis stroke="oklch(0.7 0.02 260)" fontSize={12} allowDecimals={false} />
+                <CartesianGrid stroke="rgba(148,163,184,0.16)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#64748b" fontSize={12} allowDecimals={false} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.22 0.03 265)", border: "1px solid oklch(0.3 0.03 265)", borderRadius: 8, color: "oklch(0.95 0.01 250)" }}
+                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 12, color: "#e2e8f0" }}
                 />
-                <Line type="monotone" dataKey="leads" stroke="#6366F1" strokeWidth={2.5} dot={{ fill: "#6366F1", r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="leads" stroke="#6366f1" strokeWidth={3} dot={{ fill: "#6366f1", r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         <Card className="p-5">
-          <h3 className="mb-4 font-display text-base font-semibold">Status mix</h3>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Pipeline</p>
+              <h3 className="text-lg font-semibold">Status mix</h3>
+            </div>
+            <span className="rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Live breakdown</span>
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -147,9 +179,9 @@ function Dashboard() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.22 0.03 265)", border: "1px solid oklch(0.3 0.03 265)", borderRadius: 8, color: "oklch(0.95 0.01 250)" }}
+                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 12, color: "#e2e8f0" }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11, color: "oklch(0.7 0.02 260)" }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -158,19 +190,25 @@ function Dashboard() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <h3 className="mb-4 font-display text-base font-semibold">Recent leads</h3>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Recent activity</p>
+              <h3 className="text-lg font-semibold">Latest leads</h3>
+            </div>
+            <span className="rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Top {recent.length}</span>
+          </div>
           {recent.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">No leads yet</p>
+            <div className="flex h-72 items-center justify-center text-sm text-muted-foreground">No recent leads yet</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {recent.map((l) => (
-                <div key={l.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-4 py-3">
+                <div key={l.id} className="group flex items-center justify-between gap-3 rounded-[1.5rem] border border-border/60 bg-card px-4 py-4 transition hover:border-primary/30 hover:bg-primary/5">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{l.full_name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{l.company ?? l.email}</p>
+                    <p className="truncate text-sm font-medium text-foreground">{l.full_name}</p>
+                    <p className="truncate text-sm text-muted-foreground">{l.company ?? l.email}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider", STATUS_STYLES[l.status])}>
+                    <span className={cn("rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]", STATUS_STYLES[l.status])}>
                       {STATUS_LABELS[l.status]}
                     </span>
                     <span className="hidden text-xs text-muted-foreground sm:inline">
@@ -184,16 +222,19 @@ function Dashboard() {
         </Card>
 
         <Card className="p-5">
-          <h3 className="mb-4 font-display text-base font-semibold">Lead sources</h3>
+          <div className="mb-4">
+            <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Source summary</p>
+            <h3 className="text-lg font-semibold">Lead sources</h3>
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sourceData} layout="vertical" margin={{ left: 10 }}>
-                <CartesianGrid stroke="oklch(0.3 0.03 265)" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" stroke="oklch(0.7 0.02 260)" fontSize={11} allowDecimals={false} />
-                <YAxis type="category" dataKey="name" stroke="oklch(0.7 0.02 260)" fontSize={11} width={80} />
+                <CartesianGrid stroke="rgba(148,163,184,0.16)" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" stroke="#64748b" fontSize={11} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={11} width={90} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.22 0.03 265)", border: "1px solid oklch(0.3 0.03 265)", borderRadius: 8, color: "oklch(0.95 0.01 250)" }}
-                  cursor={{ fill: "oklch(0.28 0.03 265 / 0.4)" }}
+                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 12, color: "#e2e8f0" }}
+                  cursor={{ fill: "rgba(99,102,241,0.08)" }}
                 />
                 <Bar dataKey="value" fill="#6366F1" radius={[0, 6, 6, 0]} />
               </BarChart>

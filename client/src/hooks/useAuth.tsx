@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "admin" | "member";
+type Role = "admin" | "member" | "viewer";
 
 interface AuthState {
   session: Session | null;
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (data && data.length) {
         const roles = data.map((r) => r.role as Role);
-        setRole(roles.includes("admin") ? "admin" : "member");
+        setRole(roles.includes("admin") ? "admin" : roles.includes("viewer") ? "viewer" : "member");
       } else {
         setRole(null);
       }

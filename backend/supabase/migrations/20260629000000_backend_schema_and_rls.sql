@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
-    CREATE TYPE public.app_role AS ENUM ('admin', 'member');
+    CREATE TYPE public.app_role AS ENUM ('admin', 'member', 'viewer');
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lead_status') THEN
